@@ -244,13 +244,19 @@ void *gl_threadfunc(void *arg)
 {
 	printf("GL thread\n");
 
+	printf("Why do you hate?");
 	glutInit(&g_argc, g_argv);
+	printf("Glutinited\n");
 
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH);
 	glutInitWindowSize(1280, 480);
 	glutInitWindowPosition(0, 0);
 
+	printf("Create window\n");
+
 	window = glutCreateWindow("LibFreenect");
+
+	printf("Window created\n");
 
 	glutDisplayFunc(&DrawGLScene);
 	glutIdleFunc(&DrawGLScene);
@@ -258,6 +264,8 @@ void *gl_threadfunc(void *arg)
 	glutKeyboardFunc(&keyPressed);
 
 	InitGL(1280, 480);
+
+	printf("Starting main loop\n");
 
 	glutMainLoop();
 
@@ -335,10 +343,11 @@ void rgb_cb(freenect_device *dev, void *rgb, uint32_t timestamp)
 
 void *freenect_threadfunc(void *arg)
 {
+	printf("Freenect thread\n");
 	int accelCount = 0;
 
-	freenect_set_tilt_degs(f_dev,freenect_angle);
-	freenect_set_led(f_dev,LED_RED);
+	//freenect_set_tilt_degs(f_dev,freenect_angle);
+	//freenect_set_led(f_dev,LED_RED);
 	freenect_set_depth_callback(f_dev, depth_cb);
 	freenect_set_video_callback(f_dev, rgb_cb);
 	freenect_set_video_mode(f_dev, freenect_find_video_mode(FREENECT_RESOLUTION_MEDIUM, current_format));
@@ -355,12 +364,12 @@ void *freenect_threadfunc(void *arg)
 		if (accelCount++ >= 2000)
 		{
 			accelCount = 0;
-			freenect_raw_tilt_state* state;
-			freenect_update_tilt_state(f_dev);
-			state = freenect_get_tilt_state(f_dev);
+			//freenect_raw_tilt_state* state;
+			//freenect_update_tilt_state(f_dev);
+			//state = freenect_get_tilt_state(f_dev);
 			double dx,dy,dz;
-			freenect_get_mks_accel(state, &dx, &dy, &dz);
-			printf("\r raw acceleration: %4d %4d %4d  mks acceleration: %4f %4f %4f", state->accelerometer_x, state->accelerometer_y, state->accelerometer_z, dx, dy, dz);
+			//freenect_get_mks_accel(state, &dx, &dy, &dz);
+			//printf("\r raw acceleration: %4d %4d %4d  mks acceleration: %4f %4f %4f", state->accelerometer_x, state->accelerometer_y, state->accelerometer_z, dx, dy, dz);
 			fflush(stdout);
 		}
 
@@ -432,15 +441,18 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	printf("Create thread\n");
 	res = pthread_create(&freenect_thread, NULL, freenect_threadfunc, NULL);
 	if (res) {
 		printf("pthread_create failed\n");
 		freenect_shutdown(f_ctx);
 		return 1;
 	}
+	printf("Thread created\n");
 
 	// OS X requires GLUT to run on the main thread
 	gl_threadfunc(NULL);
+	printf("Moo?");
 
 	return 0;
 }
