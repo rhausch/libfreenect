@@ -49,7 +49,7 @@ FREENECTAPI int freenect_init(freenect_context **ctx, freenect_usb_context *usb_
 	memset(*ctx, 0, sizeof(freenect_context));
 
 	(*ctx)->log_level = LL_WARNING;
-	(*ctx)->enabled_subdevices = (freenect_device_flags)(FREENECT_DEVICE_MOTOR | FREENECT_DEVICE_CAMERA
+	(*ctx)->enabled_subdevices = (freenect_device_flags)(FREENECT_DEVICE_CAMERA
 #ifdef BUILD_AUDIO
 			| FREENECT_DEVICE_AUDIO
 #endif
@@ -134,14 +134,14 @@ FREENECTAPI void freenect_free_device_attributes(struct freenect_device_attribut
 
 FREENECTAPI int freenect_supported_subdevices(void) {
 #ifdef BUILD_AUDIO
-	return FREENECT_DEVICE_MOTOR | FREENECT_DEVICE_CAMERA | FREENECT_DEVICE_AUDIO;
+	return FREENECT_DEVICE_CAMERA | FREENECT_DEVICE_AUDIO;
 #else
-	return FREENECT_DEVICE_MOTOR | FREENECT_DEVICE_CAMERA;
+	return FREENECT_DEVICE_CAMERA;
 #endif
 }
 
 FREENECTAPI void freenect_select_subdevices(freenect_context *ctx, freenect_device_flags subdevs) {
-	ctx->enabled_subdevices = (freenect_device_flags)(subdevs & (FREENECT_DEVICE_MOTOR | FREENECT_DEVICE_CAMERA
+	ctx->enabled_subdevices = (freenect_device_flags)(subdevs & ( FREENECT_DEVICE_CAMERA
 #ifdef BUILD_AUDIO
 			| FREENECT_DEVICE_AUDIO
 #endif
@@ -161,6 +161,7 @@ FREENECTAPI int freenect_open_device(freenect_context *ctx, freenect_device **de
 
 	res = fnusb_open_subdevices(pdev, index);
 	if (res < 0) {
+		printf("Rob: Failed to open subdevices\n");
 		free(pdev);
 		return res;
 	}
@@ -179,6 +180,7 @@ FREENECTAPI int freenect_open_device(freenect_context *ctx, freenect_device **de
 	// Do device-specific initialization
 	if (pdev->usb_cam.dev) {
 		if (freenect_camera_init(pdev) < 0) {
+			printf("Failed to open camera\n");
 			return -1;
 		}
 	}
